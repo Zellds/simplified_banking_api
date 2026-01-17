@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        UID: ${HOST_UID}
+        GID: ${HOST_GID}
+    container_name: simplified_banking_api
+    volumes:
+      - .:/var/www
+    working_dir: /var/www
+    command: tail -f /dev/null
+    ports:
+      - "8000:8000"
