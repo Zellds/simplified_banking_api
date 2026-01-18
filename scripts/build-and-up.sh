@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🔧 Exporting host UID and GID"
+echo "Exporting host UID and GID"
 export HOST_UID=$(id -u)
 export HOST_GID=$(id -g)
 
