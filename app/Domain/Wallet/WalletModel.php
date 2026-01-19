@@ -26,9 +26,4 @@ class WalletModel extends Model
     {
         return $this->belongsTo(UserModel::class, 'user_id');
     }
-
-    public function hasSufficientBalance(float $amount): bool
-    {
-        return $this->balance >= $amount;
-    }
 }
