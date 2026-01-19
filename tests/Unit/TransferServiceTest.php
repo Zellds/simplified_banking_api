@@ -8,12 +8,15 @@ use App\Domain\Transfer\Contracts\TransferRepository;
 use App\Domain\User\Contracts\UserRepository;
 use App\Domain\Wallet\Contracts\WalletRepository;
 use App\Domain\Transfer\Exceptions\UnauthorizedTransferException;
+use App\Domain\Transfer\Transfer;
+use App\Domain\Transfer\TransferStatus;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\Wallet\Exceptions\InsufficientBalanceException;
 use App\Domain\Wallet\Exceptions\WalletNotFoundException;
-use App\Domain\Transfer\TransferModel;
-use App\Domain\User\UserModel;
-use App\Domain\Wallet\WalletModel;
+use App\Infrastructure\Persistence\Model\TransferModel;
+use App\Domain\User\User;
+use App\Infrastructure\Persistence\Model\WalletModel;
+use App\Infrastructure\Persistence\Model\UserModel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Mockery;
@@ -25,7 +28,7 @@ class TransferServiceTest extends TestCase
     private UserRepository $userRepository;
     private WalletRepository $walletRepository;
     private TransferRepository $transferRepository;
-    private AuthorizationInterface $authorizationClient;
+    private AuthorizationInterface $authorization;
 
     protected function setUp(): void
     {
@@ -35,11 +38,11 @@ class TransferServiceTest extends TestCase
 
         DB::shouldReceive('transaction')
             ->byDefault()
-            ->andReturnUsing(fn ($callback) => $callback());
+            ->andReturnUsing(fn($callback) => $callback());
 
         DB::shouldReceive('afterCommit')
             ->byDefault()
-            ->andReturnUsing(fn ($callback) => $callback());
+            ->andReturnUsing(fn($callback) => $callback());
 
         $this->userRepository = Mockery::mock(UserRepository::class);
         $this->walletRepository = Mockery::mock(WalletRepository::class);
@@ -54,6 +57,24 @@ class TransferServiceTest extends TestCase
         );
     }
 
+    private function makeUserModel(int $id, string $type = 'common'): User
+    {
+        $name = $type === 'merchant' ? 'Merchant User' : 'Common User';
+        $email = strtolower(str_replace(' ', '.', $name)) . "{$id}@example.com";
+        $document = str_pad((string) $id, 11, '0', STR_PAD_LEFT);
+
+        $model = new UserModel([
+            'name' => $name,
+            'email' => $email,
+            'document' => $document,
+            'type' => $type,
+        ]);
+
+        $model->id = $id;
+
+        return $model->toEntity();
+    }
+
     public function test_throws_exception_when_payer_or_payee_not_found(): void
     {
         $this->userRepository->shouldReceive('findById')->andReturn(null);
@@ -65,11 +86,8 @@ class TransferServiceTest extends TestCase
 
     public function test_merchant_cannot_make_transfer(): void
     {
-        $merchant = new UserModel(['type' => 'merchant']);
-        $merchant->id = 1;
-
-        $payee = new UserModel(['type' => 'common']);
-        $payee->id = 2;
+        $merchant = $this->makeUserModel(id: 1, type: 'merchant');
+        $payee = $this->makeUserModel(id: 2, type: 'common');
 
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($merchant);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
@@ -81,10 +99,10 @@ class TransferServiceTest extends TestCase
 
     public function test_same_user_cannot_transfer_to_themselves(): void
     {
-        $user = new UserModel(['type' => 'common']);
-        $user->id = 1;
+        $payer = $this->makeUserModel(id: 1, type: 'common');
 
-        $this->userRepository->shouldReceive('findById')->with(1)->andReturn($user);
+        $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
+        $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
 
         $this->expectException(UnauthorizedTransferException::class);
 
@@ -93,11 +111,8 @@ class TransferServiceTest extends TestCase
 
     public function test_throws_exception_when_wallet_not_found(): void
     {
-        $payer = new UserModel(['type' => 'common']);
-        $payer->id = 1;
-
-        $payee = new UserModel(['type' => 'common']);
-        $payee->id = 2;
+        $payer = $this->makeUserModel(id: 1, type: 'common');
+        $payee = $this->makeUserModel(id: 2, type: 'common');
 
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
@@ -111,11 +126,8 @@ class TransferServiceTest extends TestCase
 
     public function test_throws_exception_when_balance_is_insufficient(): void
     {
-        $payer = new UserModel(['type' => 'common']);
-        $payer->id = 1;
-
-        $payee = new UserModel(['type' => 'common']);
-        $payee->id = 2;
+        $payer = $this->makeUserModel(id: 1, type: 'common');
+        $payee = $this->makeUserModel(id: 2, type: 'common');
 
         $wallet = new WalletModel(['balance' => 50]);
         $wallet->user_id = 1;
@@ -137,16 +149,13 @@ class TransferServiceTest extends TestCase
 
     public function test_transfer_is_rejected_when_authorizer_denies(): void
     {
-        $payer = new UserModel(['type' => 'common']);
-        $payer->id = 1;
-
-        $payee = new UserModel(['type' => 'common']);
-        $payee->id = 2;
+        $payer = $this->makeUserModel(id: 1, type: 'common');
+        $payee = $this->makeUserModel(id: 2, type: 'common');
 
         $wallet = new WalletModel(['balance' => 1000]);
         $wallet->user_id = 1;
 
-        $transfer = new TransferModel(['protocol' => 'TX123']);
+        $transfer = new Transfer(id: 1, protocol: 'TX123', payerId: 1, payeeId: 2, amount: 100, status: TransferStatus::PENDING);
 
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
@@ -177,11 +186,8 @@ class TransferServiceTest extends TestCase
 
     public function test_completes_transfer_and_returns_protocol(): void
     {
-        $payer = new UserModel(['type' => 'common']);
-        $payer->id = 1;
-
-        $payee = new UserModel(['type' => 'common']);
-        $payee->id = 2;
+        $payer = $this->makeUserModel(id: 1, type: 'common');
+        $payee = $this->makeUserModel(id: 2, type: 'common');
 
         $wallet = new WalletModel(['balance' => 1000]);
         $wallet->user_id = 1;
@@ -192,7 +198,7 @@ class TransferServiceTest extends TestCase
         $payeeWallet = new WalletModel(['balance' => 0]);
         $payeeWallet->user_id = 2;
 
-        $transfer = new TransferModel(['protocol' => 'TX123']);
+        $transfer = new Transfer(id: 1, protocol: 'TX123', payerId: 1, payeeId: 2, amount: 100, status: TransferStatus::PENDING);
 
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);

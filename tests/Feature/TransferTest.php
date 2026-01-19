@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Domain\Notification\Contracts\NotificationInterface;
 use App\Domain\Transfer\Contracts\AuthorizationInterface;
-use App\Domain\User\UserModel;
-use App\Domain\Wallet\WalletModel;
+use App\Infrastructure\Persistence\Model\UserModel;
+use App\Infrastructure\Persistence\Model\WalletModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -43,7 +43,7 @@ class TransferTest extends TestCase
         $response = $this->postJson('/api/transfer', [
             'payer' => $payer->id,
             'payee' => $payee->id,
-            'value' => 100,
+            'amount_cents' => 100,
         ]);
 
         $response->assertCreated();
@@ -57,12 +57,12 @@ class TransferTest extends TestCase
 
         $this->assertDatabaseHas('wallets', [
             'user_id' => $payer->id,
-            'balance' => '900.00',
+            'balance' => 900,
         ]);
 
         $this->assertDatabaseHas('wallets', [
             'user_id' => $payee->id,
-            'balance' => '100.00',
+            'balance' => 100,
         ]);
     }
 
@@ -96,7 +96,7 @@ class TransferTest extends TestCase
         $response = $this->postJson('/api/transfer', [
             'payer' => $payer->id,
             'payee' => $payee->id,
-            'value' => 100,
+            'amount_cents' => 100,
         ]);
 
         $response->assertStatus(403);
@@ -107,7 +107,7 @@ class TransferTest extends TestCase
             'status' => 'rejected',
         ]);
 
-        $this->assertDatabaseHas('wallets', ['user_id' => $payer->id, 'balance' => '1000.00']);
-        $this->assertDatabaseHas('wallets', ['user_id' => $payee->id, 'balance' => '0.00']);
+        $this->assertDatabaseHas('wallets', ['user_id' => $payer->id, 'balance' => 1000]);
+        $this->assertDatabaseHas('wallets', ['user_id' => $payee->id, 'balance' => 0]);
     }
 }
