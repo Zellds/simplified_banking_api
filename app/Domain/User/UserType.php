@@ -2,8 +2,8 @@
 
 namespace App\Domain\User;
 
-class UserType
+enum UserType: string
 {
-    public const COMMON = 'common';
-    public const MERCHANT = 'merchant';
+    case COMMON = 'common';
+    case MERCHANT = 'merchant';
 }

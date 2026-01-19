@@ -2,9 +2,9 @@
 
 namespace App\Domain\Transfer;
 
-class TransferStatus
+enum TransferStatus: string
 {
-    public const PENDING = 'pending';
-    public const APPROVED = 'approved';
-    public const REJECTED = 'rejected';
+    case PENDING = 'pending';
+    case APPROVED = 'approved';
+    case REJECTED = 'rejected';
 }

@@ -23,6 +23,7 @@ class TransferModel extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'status' => TransferStatus::class,
     ];
 
     public function payer(): BelongsTo

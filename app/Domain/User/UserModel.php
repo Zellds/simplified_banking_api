@@ -20,6 +20,10 @@ class UserModel extends Model
         'type',
     ];
 
+    protected $casts = [
+        'type' => UserType::class,
+    ];
+
     public function wallet(): HasOne
     {
         return $this->hasOne(WalletModel::class, 'user_id');
