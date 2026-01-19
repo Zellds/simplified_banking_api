@@ -4,9 +4,9 @@ namespace Tests\Unit\Application\Transfer;
 
 use App\Application\Services\TransferService;
 use App\Domain\Transfer\Contracts\AuthorizationInterface;
-use App\Domain\Transfer\TransferRepository;
-use App\Domain\User\UserRepository;
-use App\Domain\Wallet\WalletRepository;
+use App\Domain\Transfer\Contracts\TransferRepository;
+use App\Domain\User\Contracts\UserRepository;
+use App\Domain\Wallet\Contracts\WalletRepository;
 use App\Domain\Transfer\Exceptions\UnauthorizedTransferException;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\Wallet\Exceptions\InsufficientBalanceException;

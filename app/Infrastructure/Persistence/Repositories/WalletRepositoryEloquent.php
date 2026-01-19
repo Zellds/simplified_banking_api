@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Persistence\Repositories;
 
-use App\Domain\Wallet\WalletRepository;
+use App\Domain\Wallet\Contracts\WalletRepository;
 use App\Domain\Wallet\WalletModel;
 
 class WalletRepositoryEloquent implements WalletRepository

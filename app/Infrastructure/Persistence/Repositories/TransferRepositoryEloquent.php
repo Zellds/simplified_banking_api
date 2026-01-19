@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Persistence\Repositories;
 
-use App\Domain\Transfer\TransferRepository;
+use App\Domain\Transfer\Contracts\TransferRepository;
 use App\Domain\Transfer\TransferModel;
 use App\Domain\Transfer\TransferStatus;
 use Illuminate\Support\Str;

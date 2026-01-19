@@ -2,9 +2,9 @@
 
 namespace App\Application\Services;
 
-use App\Domain\Transfer\TransferRepository;
-use App\Domain\User\UserRepository;
-use App\Domain\Wallet\WalletRepository;
+use App\Domain\Transfer\Contracts\TransferRepository;
+use App\Domain\User\Contracts\UserRepository;
+use App\Domain\Wallet\Contracts\WalletRepository;
 use App\Domain\Transfer\Contracts\AuthorizationInterface;
 use App\Domain\Transfer\Events\TransferCompleted;
 use App\Domain\Transfer\Exceptions\UnauthorizedTransferException;
