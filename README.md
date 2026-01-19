@@ -1,59 +1,156 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+> Este projeto foi desenvolvido como desafio técnico e também como um estudo prático de arquitetura de software,
+> aplicando conceitos como DDD, Clean Architecture e testes automatizados.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Transfer Challenge – Laravel 12
 
-## About Laravel
+Este projeto implementa uma **API de transferências financeiras** inspirada em um desafio técnico, utilizando **Laravel 12**, **DDD**, **Clean Architecture** e boas práticas de engenharia de software.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Visão Geral
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+A API permite que usuários realizem transferências seguindo regras de negócio:
 
-## Learning Laravel
+- Apenas usuários **common** podem transferir
+- Usuários **merchant** apenas recebem
+- Saldo deve ser suficiente
+- A transferência precisa ser autorizada por um serviço externo
+- Notificação é enviada após a transferência
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Arquitetura
 
-## Laravel Sponsors
+O projeto segue uma separação clara em **Domain**, **Application** e **Infrastructure**.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Domain
+Contém o **coração do negócio**:
 
-### Premium Partners
+- Entidades (`User`, `Wallet`, `Transfer`)
+- Enums (`UserType`, `TransferStatus`)
+- Exceções de domínio
+- Interfaces de repositório
+- **Eventos de domínio** (ex: `TransferCompleted`)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+### Application
+Contém os **casos de uso**:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- `TransferService` (orquestra o fluxo de transferência)
+- Usa entidades e regras do domínio
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Infrastructure
+Contém os **detalhes técnicos**:
 
-## Security Vulnerabilities
+- Controllers e Requests HTTP
+- Implementações Eloquent dos repositórios
+- Clients externos (Authorization / Notification)
+- Event Listeners
+- Providers
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+### Estrutura de Pastas (resumida)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```text
+app/
+├── Domain/
+│   ├── User/
+│   ├── Notification/
+│   ├── Wallet/
+│   └── Transfer/
+│
+├── Application/
+│   └── Services/
+│       └── TransferService.php
+│
+├── Infrastructure/
+│   ├── Http/
+│   ├── Persistence/
+│   ├── External/
+│   ├── Listeners/
+│   └── Providers/
+```
+
+---
+
+## Fluxo da Transferência
+
+![Fluxo de Transferência](docs/images/fluxograma.jpeg)
+
+---
+
+## Endpoint
+
+### POST `/api/transfers`
+
+**Request**
+```json
+{
+  "payer": 1,
+  "payee": 2,
+  "value": 100
+}
+```
+
+**Response – 201**
+```json
+{
+    "code": 201,
+    "message": "Transfer created",
+    "protocol": "7d1c0c9a-c3e4-4659-bb6c-b00cd25153a4"
+}
+```
+
+---
+
+## Testes
+
+O projeto possui **testes unitários e de integração (feature)**.
+
+### Unit Tests
+- Testam o `TransferService` isoladamente
+- Repositórios e clients são mockados
+- Validam regras de negócio e exceções
+
+### Feature Tests
+- Testam o fluxo completo via HTTP
+- Usam banco em memória (SQLite)
+- Mockam serviços externos (Authorization / Notification)
+
+```bash
+php artisan test
+```
+
+---
+
+## Serviços Externos
+
+### Authorization Service (mock)
+Simula autorização da transferência.
+
+### Notification Service (mock)
+Simula envio de notificação:
+- Falhas **não quebram** o fluxo principal
+- Executado via Event Listener após commit
+
+---
+
+## Como rodar o projeto
+
+Script para subir o projeto
+```bash
+scripts/build-and-up
+```
+
+Caso queira rodar sem Docker:
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
