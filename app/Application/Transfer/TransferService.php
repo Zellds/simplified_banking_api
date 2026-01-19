@@ -31,8 +31,12 @@ class TransferService
             throw new UserNotFoundException();
         }
 
+        if ($payerId === $payeeId) {
+            throw new UnauthorizedTransferException('Payer and payee cannot be the same user.');
+        }
+
         if ($payer->isMerchant()) {
-            throw new UnauthorizedTransferException();
+            throw new UnauthorizedTransferException('Merchants are not allowed to initiate transfers.');
         }
 
         $wallet = $this->walletRepository->findByUserId($payer->id);

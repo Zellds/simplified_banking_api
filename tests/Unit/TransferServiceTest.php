@@ -79,6 +79,18 @@ class TransferServiceTest extends TestCase
         $this->service->execute(1, 2, 100);
     }
 
+    public function test_same_user_cannot_transfer_to_themselves(): void
+    {
+        $user = new UserModel(['type' => 'common']);
+        $user->id = 1;
+
+        $this->userRepository->shouldReceive('findById')->with(1)->andReturn($user);
+
+        $this->expectException(UnauthorizedTransferException::class);
+
+        $this->service->execute(1, 1, 100);
+    }
+
     public function test_throws_exception_when_wallet_not_found(): void
     {
         $payer = new UserModel(['type' => 'common']);
