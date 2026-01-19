@@ -14,7 +14,7 @@ class TransferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'value' => ['required', 'numeric', 'min:0.01'],
+            'amount_cents' => ['required', 'integer', 'min:1'],
             'payer' => ['required', 'integer', 'exists:users,id'],
             'payee' => ['required', 'integer', 'different:payer', 'exists:users,id'],
         ];

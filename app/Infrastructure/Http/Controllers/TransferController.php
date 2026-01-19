@@ -14,7 +14,7 @@ class TransferController
 
     public function store(TransferRequest $request): JsonResponse
     {
-        $protocol = $this->transferService->execute($request->payer, $request->payee, $request->value);
+        $protocol = $this->transferService->execute($request->payer, $request->payee, $request->amount_cents);
 
         return response()->json(['code' => 201, 'message' => 'Transfer created', 'protocol' => $protocol], 201);
     }

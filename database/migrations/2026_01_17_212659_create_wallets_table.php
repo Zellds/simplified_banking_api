@@ -15,7 +15,7 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->unique();
 
-            $table->decimal('balance', 15, 2)->default(0);
+            $table->unsignedBigInteger('balance')->default(0);
 
             $table->timestamps();
         });

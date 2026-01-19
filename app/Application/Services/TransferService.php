@@ -22,7 +22,7 @@ class TransferService
         private AuthorizationInterface $authorization,
     ) {}
 
-    public function execute(int $payerId, int $payeeId, float $amount): string
+    public function execute(int $payerId, int $payeeId, int $amount): string
     {
         $payer = $this->userRepository->findById($payerId);
         $payee = $this->userRepository->findById($payeeId);
