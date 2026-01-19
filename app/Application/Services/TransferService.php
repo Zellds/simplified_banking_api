@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Application\Transfer;
+namespace App\Application\Services;
 
-use App\Application\Transfer\Contracts\Clients\AuthorizationClientInterface;
-use App\Application\Transfer\Contracts\Repositories\TransferRepository;
-use App\Application\Transfer\Contracts\Repositories\UserRepository;
-use App\Application\Transfer\Contracts\Repositories\WalletRepository;
-use App\Application\Transfer\Events\TransferCompleted;
+use App\Domain\Transfer\TransferRepository;
+use App\Domain\User\UserRepository;
+use App\Domain\Wallet\WalletRepository;
+use App\Domain\Transfer\Contracts\AuthorizationInterface;
+use App\Domain\Transfer\Events\TransferCompleted;
 use App\Domain\Transfer\Exceptions\UnauthorizedTransferException;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\Wallet\Exceptions\InsufficientBalanceException;
@@ -19,7 +19,7 @@ class TransferService
         private UserRepository $userRepository,
         private WalletRepository $walletRepository,
         private TransferRepository $transferRepository,
-        private AuthorizationClientInterface $authorizationClient,
+        private AuthorizationInterface $authorization,
     ) {}
 
     public function execute(int $payerId, int $payeeId, float $amount): string
@@ -51,7 +51,7 @@ class TransferService
 
         $transfer = $this->transferRepository->createPending($payer->id, $payee->id, $amount);
 
-        if (!$this->authorizationClient->authorize()) {
+        if (!$this->authorization->authorize()) {
             $this->transferRepository->markAsRejected($transfer);
             throw new UnauthorizedTransferException('Transfer not authorized.');
         }

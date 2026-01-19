@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Transfer\Contracts\Repositories;
+namespace App\Domain\Transfer;
 
 use App\Domain\Transfer\TransferModel;
 

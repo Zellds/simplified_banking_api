@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Application\Transfer\Contracts\Clients\AuthorizationClientInterface;
-use App\Application\Transfer\Contracts\Clients\NotificationClientInterface;
+use App\Domain\Notification\Contracts\NotificationInterface;
+use App\Domain\Transfer\Contracts\AuthorizationInterface;
 use App\Domain\User\UserModel;
 use App\Domain\Wallet\WalletModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,11 +15,11 @@ class TransferTest extends TestCase
 
     public function test_it_transfers_money_and_returns_protocol_when_authorized(): void
     {
-        $this->mock(AuthorizationClientInterface::class, function ($mock) {
+        $this->mock(AuthorizationInterface::class, function ($mock) {
             $mock->shouldReceive('authorize')->andReturn(true);
         });
 
-        $this->mock(NotificationClientInterface::class, function ($mock) {
+        $this->mock(NotificationInterface::class, function ($mock) {
             $mock->shouldReceive('notify')->andReturn(true);
         });
 
@@ -68,11 +68,11 @@ class TransferTest extends TestCase
 
     public function test_it_rejects_transfer_when_authorizer_denies(): void
     {
-        $this->mock(AuthorizationClientInterface::class, function ($mock) {
+        $this->mock(AuthorizationInterface::class, function ($mock) {
             $mock->shouldReceive('authorize')->andReturn(false);
         });
 
-        $this->mock(NotificationClientInterface::class, function ($mock) {
+        $this->mock(NotificationInterface::class, function ($mock) {
             $mock->shouldReceive('notify')->andReturn(true);
         });
 

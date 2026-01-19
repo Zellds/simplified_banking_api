@@ -2,10 +2,10 @@
 
 namespace App\Infrastructure\External\Notification;
 
-use App\Application\Transfer\Contracts\Clients\NotificationClientInterface;
+use App\Domain\Notification\Contracts\NotificationInterface;
 use Illuminate\Support\Facades\Http;
 
-class HttpNotificationClient implements NotificationClientInterface
+class HttpNotificationClient implements NotificationInterface
 {
     public function notify(string $message): bool
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Transfer\Events;
+namespace App\Domain\Transfer\Events;
 
 class TransferCompleted
 {

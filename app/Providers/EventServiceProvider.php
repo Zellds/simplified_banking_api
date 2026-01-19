@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Application\Transfer\Events\TransferCompleted;
-use App\Application\Transfer\Listeners\SendTransferNotification;
+use App\Domain\Transfer\Events\TransferCompleted;
+use App\Infrastructure\Listeners\SendTransferNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider

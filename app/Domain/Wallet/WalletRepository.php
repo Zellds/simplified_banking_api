@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Transfer\Contracts\Repositories;
+namespace App\Domain\Wallet;
 
 use App\Domain\Wallet\WalletModel;
 

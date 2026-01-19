@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Http\Controllers;
 
-use App\Application\Transfer\TransferService;
+use App\Application\Services\TransferService;
 use App\Infrastructure\Http\Requests\TransferRequest;
 use Illuminate\Http\JsonResponse;
 

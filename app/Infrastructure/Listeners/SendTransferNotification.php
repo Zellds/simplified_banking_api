@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Application\Transfer\Listeners;
+namespace App\Infrastructure\Listeners;
 
-use App\Application\Transfer\Events\TransferCompleted;
-use App\Application\Transfer\Contracts\Clients\NotificationClientInterface;
+use App\Domain\Notification\Contracts\NotificationInterface;
+use App\Domain\Transfer\Events\TransferCompleted;
 use Illuminate\Support\Facades\Log;
 
 class SendTransferNotification
 {
     public function __construct(
-        private NotificationClientInterface $notificationClient
+        private NotificationInterface $notificationClient
     ) {}
 
     public function handle(TransferCompleted $event): void

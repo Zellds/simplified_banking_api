@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Persistence\Repositories;
 
-use App\Application\Transfer\Contracts\Repositories\UserRepository;
+use App\Domain\User\UserRepository;
 use App\Domain\User\UserModel;
 
 class UserRepositoryEloquent implements UserRepository

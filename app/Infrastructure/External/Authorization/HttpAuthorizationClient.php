@@ -2,10 +2,10 @@
 
 namespace App\Infrastructure\External\Authorization;
 
-use App\Application\Transfer\Contracts\Clients\AuthorizationClientInterface;
+use App\Domain\Transfer\Contracts\AuthorizationInterface;
 use Illuminate\Support\Facades\Http;
 
-class HttpAuthorizationClient implements AuthorizationClientInterface
+class HttpAuthorizationClient implements AuthorizationInterface
 {
     public function authorize(): bool
     {

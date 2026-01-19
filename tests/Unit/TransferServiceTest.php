@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Application\Transfer;
 
-use App\Application\Transfer\TransferService;
-use App\Application\Transfer\Contracts\Clients\AuthorizationClientInterface;
-use App\Application\Transfer\Contracts\Repositories\TransferRepository;
-use App\Application\Transfer\Contracts\Repositories\UserRepository;
-use App\Application\Transfer\Contracts\Repositories\WalletRepository;
+use App\Application\Services\TransferService;
+use App\Domain\Transfer\Contracts\AuthorizationInterface;
+use App\Domain\Transfer\TransferRepository;
+use App\Domain\User\UserRepository;
+use App\Domain\Wallet\WalletRepository;
 use App\Domain\Transfer\Exceptions\UnauthorizedTransferException;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\Wallet\Exceptions\InsufficientBalanceException;
@@ -25,7 +25,7 @@ class TransferServiceTest extends TestCase
     private UserRepository $userRepository;
     private WalletRepository $walletRepository;
     private TransferRepository $transferRepository;
-    private AuthorizationClientInterface $authorizationClient;
+    private AuthorizationInterface $authorizationClient;
 
     protected function setUp(): void
     {
@@ -44,13 +44,13 @@ class TransferServiceTest extends TestCase
         $this->userRepository = Mockery::mock(UserRepository::class);
         $this->walletRepository = Mockery::mock(WalletRepository::class);
         $this->transferRepository = Mockery::mock(TransferRepository::class);
-        $this->authorizationClient = Mockery::mock(AuthorizationClientInterface::class);
+        $this->authorization = Mockery::mock(AuthorizationInterface::class);
 
         $this->service = new TransferService(
             $this->userRepository,
             $this->walletRepository,
             $this->transferRepository,
-            $this->authorizationClient
+            $this->authorization
         );
     }
 
@@ -163,7 +163,7 @@ class TransferServiceTest extends TestCase
             ->with(1, 2, 100)
             ->andReturn($transfer);
 
-        $this->authorizationClient->shouldReceive('authorize')->andReturn(false);
+        $this->authorization->shouldReceive('authorize')->andReturn(false);
 
         $this->transferRepository
             ->shouldReceive('markAsRejected')
@@ -209,7 +209,7 @@ class TransferServiceTest extends TestCase
             ->with(1, 2, 100)
             ->andReturn($transfer);
 
-        $this->authorizationClient->shouldReceive('authorize')->andReturn(true);
+        $this->authorization->shouldReceive('authorize')->andReturn(true);
 
         $this->walletRepository->shouldReceive('findByUserIdForUpdate')->with(1)->andReturn($payerWallet);
         $this->walletRepository->shouldReceive('findByUserIdForUpdate')->with(2)->andReturn($payeeWallet);
