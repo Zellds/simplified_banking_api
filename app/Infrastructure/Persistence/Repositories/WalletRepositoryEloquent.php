@@ -3,7 +3,7 @@
 namespace App\Infrastructure\Persistence\Repositories;
 
 use App\Domain\Wallet\Contracts\WalletRepository;
-use App\Domain\Wallet\WalletModel;
+use App\Infrastructure\Persistence\Model\WalletModel;
 
 class WalletRepositoryEloquent implements WalletRepository
 {

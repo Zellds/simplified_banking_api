@@ -3,13 +3,14 @@
 namespace App\Infrastructure\Persistence\Repositories;
 
 use App\Domain\Transfer\Contracts\TransferRepository;
-use App\Domain\Transfer\TransferModel;
+use App\Domain\Transfer\Transfer;
+use App\Infrastructure\Persistence\Model\TransferModel;
 use App\Domain\Transfer\TransferStatus;
 use Illuminate\Support\Str;
 
 class TransferRepositoryEloquent implements TransferRepository
 {
-    public function createPending(int $payerId, int $payeeId, float $amount): TransferModel
+    public function createPending(int $payerId, int $payeeId, float $amount): Transfer
     {
         $transfer = new TransferModel();
 
@@ -21,19 +22,21 @@ class TransferRepositoryEloquent implements TransferRepository
 
         $transfer->save();
 
-        return $transfer;
+        return $transfer->toEntity();
     }
 
-    public function markAsApproved(TransferModel $transfer): void
+    public function markAsApproved(Transfer $transfer): void
     {
-        $transfer->status = TransferStatus::APPROVED->value;
-        $transfer->save();
+        TransferModel::query()->where('id', $transfer->id)->update([
+            'status' => TransferStatus::APPROVED->value,
+        ]);
     }
 
-    public function markAsRejected(TransferModel $transfer): void
+    public function markAsRejected(Transfer $transfer): void
     {
-        $transfer->status = TransferStatus::REJECTED->value;
-        $transfer->save();
+        TransferModel::query()->where('id', $transfer->id)->update([
+            'status' => TransferStatus::REJECTED->value,
+        ]);
     }
 
     private function normalizeMoney(float $amount): string

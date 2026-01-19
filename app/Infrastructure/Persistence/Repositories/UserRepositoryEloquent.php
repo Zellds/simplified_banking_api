@@ -2,13 +2,20 @@
 
 namespace App\Infrastructure\Persistence\Repositories;
 
+use App\Domain\User\User;
 use App\Domain\User\Contracts\UserRepository;
-use App\Domain\User\UserModel;
+use App\Infrastructure\Persistence\Model\UserModel;
 
 class UserRepositoryEloquent implements UserRepository
 {
-	public function findById($userId): ?UserModel
+	public function findById(int $id): ?User
 	{
-		return UserModel::find($userId);
+		$model = UserModel::query()->find($id);
+
+		if (!$model) {
+			return null;
+		}
+
+		return $model->toEntity();
 	}
 }

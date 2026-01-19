@@ -2,7 +2,7 @@
 
 namespace App\Domain\Wallet\Contracts;
 
-use App\Domain\Wallet\WalletModel;
+use App\Infrastructure\Persistence\Model\WalletModel;
 
 interface WalletRepository
 {

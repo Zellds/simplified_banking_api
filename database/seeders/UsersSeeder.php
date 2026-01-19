@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Domain\User\UserModel;
+use App\Infrastructure\Persistence\Model\UserModel;
 use App\Domain\User\UserType;
 use Illuminate\Database\Seeder;
 

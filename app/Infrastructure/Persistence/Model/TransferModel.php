@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Domain\Transfer;
+namespace App\Infrastructure\Persistence\Model;
 
-use App\Domain\User\UserModel;
+use App\Domain\Transfer\Transfer;
+use App\Domain\Transfer\TransferStatus;
+use App\Infrastructure\Persistence\Model\UserModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,5 +36,17 @@ class TransferModel extends Model
     public function payee(): BelongsTo
     {
         return $this->belongsTo(UserModel::class, 'payee_id');
+    }
+
+    public function toEntity()
+    {
+        return new Transfer(
+            id: $this->id,
+            protocol: $this->protocol,
+            payerId: $this->payer_id,
+            payeeId: $this->payee_id,
+            amount: $this->amount,
+            status: $this->status,
+        );
     }
 }

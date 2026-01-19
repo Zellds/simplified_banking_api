@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Domain\User;
+namespace App\Infrastructure\Persistence\Model;
 
-use App\Domain\Wallet\WalletModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Domain\User\User;
+use App\Domain\User\UserType;
+use App\Infrastructure\Persistence\Model\WalletModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UserModel extends Model
 {
@@ -29,13 +31,14 @@ class UserModel extends Model
         return $this->hasOne(WalletModel::class, 'user_id');
     }
 
-    public function isMerchant(): bool
+    public function toEntity()
     {
-        return $this->type === UserType::MERCHANT;
-    }
-
-    public function isCommon(): bool
-    {
-        return $this->type === UserType::COMMON;
+        return new User(
+            id: $this->id,
+            name: $this->name,
+            email: $this->email,
+            document: $this->document,
+            type: $this->type
+        );
     }
 }
