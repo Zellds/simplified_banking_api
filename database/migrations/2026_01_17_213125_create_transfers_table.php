@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('payee_id')
                 ->constrained('users');
 
-            $table->decimal('amount', 15, 2);
+            $table->bigInteger('amount')->unsigned();
             $table->enum('status', ['pending', 'approved', 'rejected']);
             $table->timestamps();
         });
