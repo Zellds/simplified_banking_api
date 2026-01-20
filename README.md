@@ -139,6 +139,16 @@ Simula envio de notificação:
 
 ---
 
+## Melhorias Futuras
+
+- Processamento Assíncrono (Filas)
+- Logs, Metricas e Monitoramento
+- Seperar banco do servidor
+- Testes de concorrência
+- Rate limit por usuário
+
+---
+
 ## Como rodar o projeto
 
 Script para subir o projeto
