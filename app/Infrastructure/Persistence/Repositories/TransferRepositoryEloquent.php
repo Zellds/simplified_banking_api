@@ -17,7 +17,7 @@ class TransferRepositoryEloquent implements TransferRepository
         $transfer->protocol = Str::uuid();
         $transfer->payer_id = $payerId;
         $transfer->payee_id = $payeeId;
-        $transfer->amount = $this->normalizeMoney($amount);
+        $transfer->amount = $amount;
         $transfer->status = TransferStatus::PENDING->value;
 
         $transfer->save();
@@ -37,10 +37,5 @@ class TransferRepositoryEloquent implements TransferRepository
         TransferModel::query()->where('id', $transfer->id)->update([
             'status' => TransferStatus::REJECTED->value,
         ]);
-    }
-
-    private function normalizeMoney(float $amount): string
-    {
-        return number_format($amount, 2, '.', '');
     }
 }
