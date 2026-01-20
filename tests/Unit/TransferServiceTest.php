@@ -125,6 +125,7 @@ class TransferServiceTest extends TestCase
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
 
         $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn(null);
+        $this->walletRepository->shouldReceive('findByUserId')->with(2)->andReturn(null);
 
         $this->expectException(WalletNotFoundException::class);
 
@@ -136,16 +137,18 @@ class TransferServiceTest extends TestCase
         $payer = $this->makeUserEntity(id: 1, type: 'common');
         $payee = $this->makeUserEntity(id: 2, type: 'common');
 
-        $wallet = $this->makeWalletEntity(id: 10, userId: 1, balance: 50);
+        $payerWallet = $this->makeWalletEntity(id: 10, userId: 1, balance: 50);
+        $payeeWallet = $this->makeWalletEntity(id: 11, userId: 2, balance: 500);
 
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
 
-        $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn($wallet);
+        $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn($payerWallet);
+        $this->walletRepository->shouldReceive('findByUserId')->with(2)->andReturn($payeeWallet);
 
         $this->walletRepository
             ->shouldReceive('hasSufficientBalance')
-            ->with($wallet, 100)
+            ->with($payerWallet, 100)
             ->andReturn(false);
 
         $this->expectException(InsufficientBalanceException::class);
@@ -158,7 +161,8 @@ class TransferServiceTest extends TestCase
         $payer = $this->makeUserEntity(id: 1, type: 'common');
         $payee = $this->makeUserEntity(id: 2, type: 'common');
 
-        $wallet = $this->makeWalletEntity(id: 10, userId: 1, balance: 100000);
+        $payerWallet = $this->makeWalletEntity(id: 10, userId: 1, balance: 100000);
+        $payeeWallet = $this->makeWalletEntity(id: 11, userId: 2, balance: 100000);
 
         $transfer = new Transfer(
             id: 1,
@@ -172,11 +176,12 @@ class TransferServiceTest extends TestCase
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
 
-        $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn($wallet);
+        $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn($payerWallet);
+        $this->walletRepository->shouldReceive('findByUserId')->with(2)->andReturn($payeeWallet);
 
         $this->walletRepository
             ->shouldReceive('hasSufficientBalance')
-            ->with($wallet, 100)
+            ->with($payerWallet, 100)
             ->andReturn(true);
 
         $this->transferRepository
@@ -201,7 +206,8 @@ class TransferServiceTest extends TestCase
         $payer = $this->makeUserEntity(id: 1, type: 'common');
         $payee = $this->makeUserEntity(id: 2, type: 'common');
 
-        $wallet = $this->makeWalletEntity(id: 10, userId: 1, balance: 100000);
+        $payerWallet = $this->makeWalletEntity(id: 10, userId: 1, balance: 100000);
+        $payeeWallet = $this->makeWalletEntity(id: 20, userId: 2, balance: 0);
 
         $payerWalletLocked = $this->makeWalletEntity(id: 10, userId: 1, balance: 100000);
         $payeeWalletLocked = $this->makeWalletEntity(id: 20, userId: 2, balance: 0);
@@ -211,7 +217,8 @@ class TransferServiceTest extends TestCase
         $this->userRepository->shouldReceive('findById')->with(1)->andReturn($payer);
         $this->userRepository->shouldReceive('findById')->with(2)->andReturn($payee);
 
-        $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn($wallet);
+        $this->walletRepository->shouldReceive('findByUserId')->with(1)->andReturn($payerWallet);
+        $this->walletRepository->shouldReceive('findByUserId')->with(2)->andReturn($payeeWallet);
 
         $this->walletRepository
             ->shouldReceive('hasSufficientBalance')

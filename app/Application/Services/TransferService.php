@@ -39,13 +39,14 @@ class TransferService
             throw new UnauthorizedTransferException('Merchants are not allowed to initiate transfers.');
         }
 
-        $wallet = $this->walletRepository->findByUserId($payer->id);
+        $payerWallet = $this->walletRepository->findByUserId($payer->id);
+        $payeeWallet = $this->walletRepository->findByUserId($payee->id);
 
-        if (!$wallet) {
+        if (!$payerWallet || !$payeeWallet) {
             throw new WalletNotFoundException();
         }
 
-        if (!$this->walletRepository->hasSufficientBalance($wallet, $amount)) {
+        if (!$this->walletRepository->hasSufficientBalance($payerWallet, $amount)) {
             throw new InsufficientBalanceException();
         }
 
@@ -59,14 +60,6 @@ class TransferService
         DB::transaction(function () use ($payer, $payee, $amount, $transfer) {
             $payerWallet = $this->walletRepository->findByUserIdForUpdate($payer->id);
             $payeeWallet = $this->walletRepository->findByUserIdForUpdate($payee->id);
-
-            if (!$payerWallet || !$payeeWallet) {
-                throw new WalletNotFoundException();
-            }
-
-            if (!$this->walletRepository->hasSufficientBalance($payerWallet, $amount)) {
-                throw new InsufficientBalanceException();
-            }
 
             $payerWalletUpdated = $payerWallet->debit($amount);
             $payeeWalletUpdated = $payeeWallet->credit($amount);
