@@ -60,11 +60,19 @@ class TransferService
             $payerWallet = $this->walletRepository->findByUserIdForUpdate($payer->id);
             $payeeWallet = $this->walletRepository->findByUserIdForUpdate($payee->id);
 
-            $this->walletRepository->debit($payerWallet, $amount);
-            $this->walletRepository->credit($payeeWallet, $amount);
+            if (!$payerWallet || !$payeeWallet) {
+                throw new WalletNotFoundException();
+            }
 
-            $this->walletRepository->save($payerWallet);
-            $this->walletRepository->save($payeeWallet);
+            if (!$this->walletRepository->hasSufficientBalance($payerWallet, $amount)) {
+                throw new InsufficientBalanceException();
+            }
+
+            $payerWalletUpdated = $payerWallet->debit($amount);
+            $payeeWalletUpdated = $payeeWallet->credit($amount);
+
+            $this->walletRepository->save($payerWalletUpdated);
+            $this->walletRepository->save($payeeWalletUpdated);
 
             $this->transferRepository->markAsApproved($transfer);
 

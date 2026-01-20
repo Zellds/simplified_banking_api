@@ -2,19 +2,15 @@
 
 namespace App\Domain\Wallet\Contracts;
 
-use App\Infrastructure\Persistence\Model\WalletModel;
+use App\Domain\Wallet\Wallet;
 
 interface WalletRepository
 {
-    public function findByUserId(int $userId): ?WalletModel;
+    public function findByUserId(int $userId): ?Wallet;
 
-    public function findByUserIdForUpdate(int $userId): ?WalletModel;
+    public function findByUserIdForUpdate(int $userId): ?Wallet;
 
-    public function hasSufficientBalance(WalletModel $wallet, float $amount): bool;
+    public function hasSufficientBalance(Wallet $wallet, int $amount): bool;
 
-    public function save(WalletModel $wallet): void;
-
-    public function debit(WalletModel $wallet, float $amount): void;
-
-    public function credit(WalletModel $wallet, float $amount): void;
+    public function save(Wallet $wallet): void;
 }

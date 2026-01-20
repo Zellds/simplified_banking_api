@@ -3,40 +3,39 @@
 namespace App\Infrastructure\Persistence\Repositories;
 
 use App\Domain\Wallet\Contracts\WalletRepository;
+use App\Domain\Wallet\Wallet;
 use App\Infrastructure\Persistence\Model\WalletModel;
 
 class WalletRepositoryEloquent implements WalletRepository
 {
-    public function findByUserId(int $userId): ?WalletModel
+    public function findByUserId(int $userId): ?Wallet
     {
-        return WalletModel::where('user_id', $userId)->first();
+        $model = WalletModel::query()
+            ->where('user_id', $userId)
+            ->first();
+
+        return $model ? $model->toEntity() : null;
     }
 
-    public function findByUserIdForUpdate(int $userId): ?WalletModel
+    public function findByUserIdForUpdate(int $userId): ?Wallet
     {
-        return WalletModel::query()
+        $model = WalletModel::query()
             ->where('user_id', $userId)
             ->lockForUpdate()
             ->first();
+
+        return $model ? $model->toEntity() : null;
     }
 
-    public function hasSufficientBalance(WalletModel $wallet, float $amount): bool
+    public function hasSufficientBalance(Wallet $wallet, int $amount): bool
     {
-        return $wallet->balance >= $amount;
+        return $wallet->hasSufficientBalance($amount);
     }
 
-    public function save(WalletModel $wallet): void
+    public function save(Wallet $wallet): void
     {
-        $wallet->save();
-    }
-
-    public function debit(WalletModel $wallet, float $amount): void
-    {
-        $wallet->balance -= $amount;
-    }
-
-    public function credit(WalletModel $wallet, float $amount): void
-    {
-        $wallet->balance += $amount;
+        WalletModel::query()
+            ->whereKey($wallet->id)
+            ->update(['balance' => $wallet->balance]);
     }
 }

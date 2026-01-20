@@ -3,33 +3,28 @@
 namespace App\Infrastructure\Persistence\Model;
 
 use App\Domain\Wallet\Wallet;
-use App\Infrastructure\Persistence\Model\UserModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WalletModel extends Model
 {
-    use HasFactory;
-
     protected $table = 'wallets';
 
     protected $fillable = [
         'user_id',
-        'balance',
+        'balance', 
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(UserModel::class, 'user_id');
-    }
+    protected $casts = [
+        'balance' => 'integer',
+        'user_id' => 'integer',
+    ];
 
-    public function toEntity()
+    public function toEntity(): Wallet
     {
         return new Wallet(
             id: $this->id,
             userId: $this->user_id,
-            balance:  $this->balance,
+            balance: $this->balance
         );
     }
 }
