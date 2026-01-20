@@ -12,10 +12,6 @@ class UserRepositoryEloquent implements UserRepository
 	{
 		$model = UserModel::query()->find($id);
 
-		if (!$model) {
-			return null;
-		}
-
-		return $model->toEntity();
+		return $model ? $model->toEntity() : null;
 	}
 }
